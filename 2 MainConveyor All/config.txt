@@ -1,0 +1,9 @@
+Type	Order	SubOrder
+1	3	3
+Order Loops Not_Loops Not_Single
+2	3	0	0
+3	1	0	0
+4	11	0	0
+5	15	41	0	
+6	46	210	0
+
