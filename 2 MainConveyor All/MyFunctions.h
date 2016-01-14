@@ -77,9 +77,7 @@ struct state
 	}
 
 
-	
-
-	bool operator==(state s) //состояния равны если номера всех состояний равны
+	bool operator==(const state s) const//состояния равны если номера всех состояний равны
 	{
 		for (int i = 0; i < N; i++)
 			if (states[i] != s.states[i])

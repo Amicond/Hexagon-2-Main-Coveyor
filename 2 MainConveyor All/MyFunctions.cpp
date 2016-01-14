@@ -315,8 +315,9 @@ void add_state_to_map(unordered_map<state, double> &cur_set, const state s)
 	double curE,E0;
 	E0=Energie[0]*N;
 
-	vector<state>::iterator it;
-	for(unsigned int inSt=0;inSt<inv.size();inSt++)
+	vector<state>::iterator it_inv,it_temp;
+
+	for(it_inv=inv.begin();it_inv!=inv.end();it_inv++)
 	{
 		for(int i=0;i<interAmount[interNumber];i++) //перебираем все эл-ты взаимодействия
 		{
@@ -327,24 +328,24 @@ void add_state_to_map(unordered_map<state, double> &cur_set, const state s)
 				temp.clear();//очищаем временный массив состояний, важно для y и z компонент
 				for (int j = 0; j<MatrixSize; j++)//вычисляем результат воздействия 1ой сигма-
 				{
-					if(Vmatrix[curInter[interNumber][i].v1][ort][inv[inSt].states[curInter[interNumber][i].n1]][j]!=0)
+					if(Vmatrix[curInter[interNumber][i].v1][ort][it_inv->states[curInter[interNumber][i].n1]][j]!=0)
 					{
 						//При 1ом проходе это верно, дальше надо умножать
 
 						if(ort==1||ort==0)//у-сигма матрица, то надо умножить на -1, только 1 раз
-							tempst.factor=inv[inSt].factor*0.5*Vmatrix[curInter[interNumber][i].v1][ort][inv[inSt].states[curInter[interNumber][i].n1]][j];
+							tempst.factor = it_inv->factor*0.5*Vmatrix[curInter[interNumber][i].v1][ort][it_inv->states[curInter[interNumber][i].n1]][j];
 						else
-							tempst.factor=inv[inSt].factor*Vmatrix[curInter[interNumber][i].v1][ort][inv[inSt].states[curInter[interNumber][i].n1]][j];
+							tempst.factor = it_inv->factor*Vmatrix[curInter[interNumber][i].v1][ort][it_inv->states[curInter[interNumber][i].n1]][j];
 						//Копируем старые состояния, так как не знаем какое будет меняться
 						for(int oldst=0;oldst<N;oldst++)
-							tempst.states[oldst]=inv[inSt].states[oldst];
+							tempst.states[oldst] = it_inv->states[oldst];
 
 						//Меняем состояние
 						tempst.states[curInter[interNumber][i].n1]=j;
 
-						tempst.coeff[0]=inv[inSt].coeff[0];
-						tempst.coeff[1]=inv[inSt].coeff[1];
-						tempst.coeff[2]=inv[inSt].coeff[2];
+						tempst.coeff[0] = it_inv->coeff[0];
+						tempst.coeff[1] = it_inv->coeff[1];
+						tempst.coeff[2] = it_inv->coeff[2];
 						//Меняем при действии только первой матрицей!!!
 						tempst.coeff[curInter[interNumber][i].Jtype]++;
 
@@ -357,14 +358,15 @@ void add_state_to_map(unordered_map<state, double> &cur_set, const state s)
 				case 1: second_ort=0; break;
 				case 2: second_ort=2; break;
 				}
-				for(int k=0;k<temp.size();k++) //действуем на полученные состояния 2ой матрицей
+
+				for (it_temp = temp.begin(); it_temp != temp.end(); it_temp++) //действуем на полученные состояния 2ой матрицей
 				{
 					for (int j = 0; j<MatrixSize; j++)
 					{
-						if(Vmatrix[curInter[interNumber][i].v2][second_ort][temp[k].states[curInter[interNumber][i].n2]][j]!=0)
+						if (Vmatrix[curInter[interNumber][i].v2][second_ort][it_temp->states[curInter[interNumber][i].n2]][j] != 0)
 						{
 							for(int oldst=0;oldst<N;oldst++)
-								tempst.states[oldst]=temp[k].states[oldst];
+								tempst.states[oldst] = it_temp->states[oldst];
 							tempst.states[curInter[interNumber][i].n2]=j;
 
 							curE=0;
@@ -373,14 +375,14 @@ void add_state_to_map(unordered_map<state, double> &cur_set, const state s)
 
 							if(curE!=E0)
 							{
-								tempst.factor=temp[k].factor*Vmatrix[curInter[interNumber][i].v2][second_ort][temp[k].states[curInter[interNumber][i].n2]][j];
+								tempst.factor = it_temp->factor*Vmatrix[curInter[interNumber][i].v2][second_ort][it_temp->states[curInter[interNumber][i].n2]][j];
 
-								tempst.coeff[0]=temp[k].coeff[0];
-								tempst.coeff[1]=temp[k].coeff[1];
-								tempst.coeff[2]=temp[k].coeff[2];
+								tempst.coeff[0] = it_temp->coeff[0];
+								tempst.coeff[1] = it_temp->coeff[1];
+								tempst.coeff[2] = it_temp->coeff[2];
 
 								temp2.push_back(tempst);  //записываем в выходной вектор
-								add_state_to_map(temp2)
+								//add_state_to_map(temp2)
 							}
 						}
 					}
@@ -411,7 +413,8 @@ void add_state_to_map(unordered_map<state, double> &cur_set, const state s)
 	if(sti==1)testout.open("testout.txt",ios::out);*/
 	//end test
 
-	for(int inSt=0;inSt<inv.size();inSt++)
+	vector<state>::iterator it_inv, it_temp;
+	for (it_inv = inv.begin(); it_inv != inv.end(); it_inv++)
 	{
 		for(int i=0;i<interAmount[interNumber];i++) //перебираем все эл-ты взаимодействия
 		{
@@ -422,24 +425,24 @@ void add_state_to_map(unordered_map<state, double> &cur_set, const state s)
 				temp.clear();//очищаем временный массив состояний, важно для y и z компонент
 				for (int j = 0; j<MatrixSize; j++)//вычисляем результат воздействия 1ой сигма-
 				{
-					if(Vmatrix[curInter[interNumber][i].v1][ort][inv[inSt].states[curInter[interNumber][i].n1]][j]!=0)
+					if (Vmatrix[curInter[interNumber][i].v1][ort][it_inv->states[curInter[interNumber][i].n1]][j] != 0)
 					{
 						//При 1ом проходе это верно, дальше надо умножать
 
 						if(ort==1||ort==0)//у-сигма матрица, то надо умножить на -1, только 1 раз
-							tempst.factor=inv[inSt].factor*0.5*Vmatrix[curInter[interNumber][i].v1][ort][inv[inSt].states[curInter[interNumber][i].n1]][j];
+							tempst.factor = it_inv->factor*0.5*Vmatrix[curInter[interNumber][i].v1][ort][it_inv->states[curInter[interNumber][i].n1]][j];
 						else
-							tempst.factor=inv[inSt].factor*Vmatrix[curInter[interNumber][i].v1][ort][inv[inSt].states[curInter[interNumber][i].n1]][j];
+							tempst.factor = it_inv->factor*Vmatrix[curInter[interNumber][i].v1][ort][it_inv->states[curInter[interNumber][i].n1]][j];
 						//Копируем старые состояния, так как не знаем какое будет меняться
 						for(int oldst=0;oldst<N;oldst++)
-							tempst.states[oldst]=inv[inSt].states[oldst];
+							tempst.states[oldst] = it_inv->states[oldst];
 
 						//Меняем состояние
 						tempst.states[curInter[interNumber][i].n1]=j;
 
-						tempst.coeff[0]=inv[inSt].coeff[0];
-						tempst.coeff[1]=inv[inSt].coeff[1];
-						tempst.coeff[2]=inv[inSt].coeff[2];
+						tempst.coeff[0] = it_inv->coeff[0];
+						tempst.coeff[1] = it_inv->coeff[1];
+						tempst.coeff[2] = it_inv->coeff[2];
 						//Меняем при действии только первой матрицей!!!
 						tempst.coeff[curInter[interNumber][i].Jtype]++;
 
@@ -453,14 +456,14 @@ void add_state_to_map(unordered_map<state, double> &cur_set, const state s)
 				case 1: second_ort=0; break;
 				case 2: second_ort=2; break;
 				}
-				for(int k=0;k<temp.size();k++) //действуем на полученные состояния 2ой матрицей
+				for (it_temp = temp.begin(); it_temp != temp.end(); it_temp++) //действуем на полученные состояния 2ой матрицей
 				{
 					for (int j = 0; j<MatrixSize; j++)
 					{
-						if(Vmatrix[curInter[interNumber][i].v2][second_ort][temp[k].states[curInter[interNumber][i].n2]][j]!=0)
+						if (Vmatrix[curInter[interNumber][i].v2][second_ort][it_temp->states[curInter[interNumber][i].n2]][j] != 0)
 						{
 							for(int oldst=0;oldst<N;oldst++)
-								tempst.states[oldst]=temp[k].states[oldst];
+								tempst.states[oldst] = it_temp->states[oldst];
 							tempst.states[curInter[interNumber][i].n2]=j;
 
 							curE=0;
@@ -469,11 +472,11 @@ void add_state_to_map(unordered_map<state, double> &cur_set, const state s)
 
 							if(curE==E0)
 							{
-								tempst.factor=temp[k].factor*Vmatrix[curInter[interNumber][i].v2][second_ort][temp[k].states[curInter[interNumber][i].n2]][j];
+								tempst.factor = it_temp->factor*Vmatrix[curInter[interNumber][i].v2][second_ort][it_temp->states[curInter[interNumber][i].n2]][j];
 
-								tempst.coeff[0]=temp[k].coeff[0];
-								tempst.coeff[1]=temp[k].coeff[1];
-								tempst.coeff[2]=temp[k].coeff[2];
+								tempst.coeff[0] = it_temp->coeff[0];
+								tempst.coeff[1] = it_temp->coeff[1];
+								tempst.coeff[2] = it_temp->coeff[2];
 
 								temp2.push_back(tempst);  //записываем в выходной вектор
 							}
@@ -503,10 +506,9 @@ void add_state_to_map(unordered_map<state, double> &cur_set, const state s)
 		temp2.reserve(30000);
 	outv.clear();
 	E0=N*Energie[0];
-	for(int inSt=0;inSt<inv.size();inSt++)
+	vector<state>::iterator it_inv, it_temp;
+	for (it_inv = inv.begin(); it_inv != inv.end(); it_inv++)
 	{
-
-
 		for(int i=0;i<interAmount[interNumber];i++) //перебираем все эл-ты взаимодействия
 		{
 			//temp2.clear();
@@ -516,24 +518,24 @@ void add_state_to_map(unordered_map<state, double> &cur_set, const state s)
 				temp.clear();//очищаем временный массив состояний, важно для y и z компонент
 				for (int j = 0; j<MatrixSize; j++)//вычисляем результат воздействия 1ой сигма-
 				{
-					if(Vmatrix[curInter[interNumber][i].v1][ort][inv[inSt].states[curInter[interNumber][i].n1]][j]!=0)
+					if (Vmatrix[curInter[interNumber][i].v1][ort][it_inv->states[curInter[interNumber][i].n1]][j] != 0)
 					{
 						//При 1ом проходе это верно, дальше надо умножать
 
 						if(ort==1||ort==0)//у-сигма матрица, то надо умножить на -1, только 1 раз
-							tempst.factor=inv[inSt].factor* 0.5*Vmatrix[curInter[interNumber][i].v1][ort][inv[inSt].states[curInter[interNumber][i].n1]][j];
+							tempst.factor = it_inv->factor* 0.5*Vmatrix[curInter[interNumber][i].v1][ort][it_inv->states[curInter[interNumber][i].n1]][j];
 						else
-							tempst.factor=inv[inSt].factor*Vmatrix[curInter[interNumber][i].v1][ort][inv[inSt].states[curInter[interNumber][i].n1]][j];
+							tempst.factor = it_inv->factor*Vmatrix[curInter[interNumber][i].v1][ort][it_inv->states[curInter[interNumber][i].n1]][j];
 						//Копируем старые состояния, так как не знаем какое будет меняться
 						for(int oldst=0;oldst<N;oldst++)
-							tempst.states[oldst]=inv[inSt].states[oldst];
+							tempst.states[oldst] = it_inv->states[oldst];
 
 						//Меняем состояние
 						tempst.states[curInter[interNumber][i].n1]=j;
 
-						tempst.coeff[0]=inv[inSt].coeff[0];
-						tempst.coeff[1]=inv[inSt].coeff[1];;
-						tempst.coeff[2]=inv[inSt].coeff[2];;
+						tempst.coeff[0] = it_inv->coeff[0];
+						tempst.coeff[1] = it_inv->coeff[1];;
+						tempst.coeff[2] = it_inv->coeff[2];;
 						//Меняем при действии только первой матрицей!!!
 						tempst.coeff[curInter[interNumber][i].Jtype]++;
 
@@ -546,14 +548,14 @@ void add_state_to_map(unordered_map<state, double> &cur_set, const state s)
 				case 1: second_ort=0; break;
 				case 2: second_ort=2; break;
 				}
-				for(int k=0;k<temp.size();k++) //действуем на полученные состояния 2ой матрицей
+				for (it_temp = temp.begin(); it_temp != temp.end(); it_temp++) //действуем на полученные состояния 2ой матрицей
 				{
 					for (int j = 0; j<MatrixSize; j++)
 					{
-						if(Vmatrix[curInter[interNumber][i].v2][second_ort][temp[k].states[curInter[interNumber][i].n2]][j]!=0)
+						if (Vmatrix[curInter[interNumber][i].v2][second_ort][it_temp->states[curInter[interNumber][i].n2]][j] != 0)
 						{
 							for(int oldst=0;oldst<N;oldst++)
-								tempst.states[oldst]=temp[k].states[oldst];
+								tempst.states[oldst] = it_temp->states[oldst];
 							tempst.states[curInter[interNumber][i].n2]=j;
 
 							curE=0;
@@ -563,10 +565,10 @@ void add_state_to_map(unordered_map<state, double> &cur_set, const state s)
 
 							if(curE!=E0)
 							{
-								tempst.factor=temp[k].factor*Vmatrix[curInter[interNumber][i].v2][second_ort][temp[k].states[curInter[interNumber][i].n2]][j]/(E0-curE);
-								tempst.coeff[0]=temp[k].coeff[0];
-								tempst.coeff[1]=temp[k].coeff[1];
-								tempst.coeff[2]=temp[k].coeff[2];
+								tempst.factor = it_temp->factor*Vmatrix[curInter[interNumber][i].v2][second_ort][it_temp->states[curInter[interNumber][i].n2]][j] / (E0 - curE);
+								tempst.coeff[0] = it_temp->coeff[0];
+								tempst.coeff[1] = it_temp->coeff[1];
+								tempst.coeff[2] = it_temp->coeff[2];
 
 								temp2.push_back(tempst);  //записываем в выходной вектор
 							}
@@ -600,10 +602,9 @@ void add_state_to_map(unordered_map<state, double> &cur_set, const state s)
 		temp2.reserve(30000);
 	outv.clear();
 	E0=N*Energie[0];
-	for(int inSt=0;inSt<inv.size();inSt++)
+	vector<state>::iterator it_inv, it_temp;
+	for (it_inv = inv.begin(); it_inv != inv.end(); it_inv++)
 	{
-
-
 		for(int i=0;i<interAmount[interNumber];i++) //перебираем все эл-ты взаимодействия
 		{
 			//temp2.clear();
@@ -613,17 +614,17 @@ void add_state_to_map(unordered_map<state, double> &cur_set, const state s)
 				temp.clear();//очищаем временный массив состояний, важно для y и z компонент
 				for (int j = 0; j<MatrixSize; j++)//вычисляем результат воздействия 1ой сигма-
 				{
-					if(Vmatrix[curInter[interNumber][i].v1][ort][inv[inSt].states[curInter[interNumber][i].n1]][j]!=0)
+					if (Vmatrix[curInter[interNumber][i].v1][ort][it_inv->states[curInter[interNumber][i].n1]][j] != 0)
 					{
 						//При 1ом проходе это верно, дальше надо умножать
 
 						if(ort==1||ort==0)//у-сигма матрица, то надо умножить на -1, только 1 раз
-							tempst.factor=inv[inSt].factor* 0.5*Vmatrix[curInter[interNumber][i].v1][ort][inv[inSt].states[curInter[interNumber][i].n1]][j];
+							tempst.factor = it_inv->factor*0.5*Vmatrix[curInter[interNumber][i].v1][ort][it_inv->states[curInter[interNumber][i].n1]][j];
 						else
-							tempst.factor=inv[inSt].factor*Vmatrix[curInter[interNumber][i].v1][ort][inv[inSt].states[curInter[interNumber][i].n1]][j];
+							tempst.factor = it_inv->factor*Vmatrix[curInter[interNumber][i].v1][ort][it_inv->states[curInter[interNumber][i].n1]][j];
 						//Копируем старые состояния, так как не знаем какое будет меняться
 						for(int oldst=0;oldst<N;oldst++)
-							tempst.states[oldst]=inv[inSt].states[oldst];
+							tempst.states[oldst] = it_inv->states[oldst];
 						/*tempst.states[0]=inv[inSt].states[0];
 						tempst.states[1]=inv[inSt].states[1];
 						tempst.states[2]=inv[inSt].states[2];*/
@@ -631,9 +632,9 @@ void add_state_to_map(unordered_map<state, double> &cur_set, const state s)
 						//Меняем состояние
 						tempst.states[curInter[interNumber][i].n1]=j;
 
-						tempst.coeff[0]=inv[inSt].coeff[0];
-						tempst.coeff[1]=inv[inSt].coeff[1];;
-						tempst.coeff[2]=inv[inSt].coeff[2];;
+						tempst.coeff[0] = it_inv->coeff[0];
+						tempst.coeff[1] = it_inv->coeff[1];;
+						tempst.coeff[2] = it_inv->coeff[2];;
 						//Меняем при действии только первой матрицей!!!
 						tempst.coeff[curInter[interNumber][i].Jtype]++;
 
@@ -646,25 +647,25 @@ void add_state_to_map(unordered_map<state, double> &cur_set, const state s)
 				case 1: second_ort=0; break;
 				case 2: second_ort=2; break;
 				}
-				for(int k=0;k<temp.size();k++) //действуем на полученные состояния 2ой матрицей
+				for (it_temp = temp.begin(); it_temp != temp.end(); it_temp++) //действуем на полученные состояния 2ой матрицей
 				{
 					for (int j = 0; j<MatrixSize; j++)
 					{
-						if(Vmatrix[curInter[interNumber][i].v2][second_ort][temp[k].states[curInter[interNumber][i].n2]][j]!=0)
+						if (Vmatrix[curInter[interNumber][i].v2][second_ort][it_temp->states[curInter[interNumber][i].n2]][j] != 0)
 						{
-							tempst.factor=temp[k].factor*Vmatrix[curInter[interNumber][i].v2][second_ort][temp[k].states[curInter[interNumber][i].n2]][j];
+							tempst.factor = it_temp->factor*Vmatrix[curInter[interNumber][i].v2][second_ort][it_temp->states[curInter[interNumber][i].n2]][j];
 
 							/*
 							tempst.states[0]=temp[k].states[0];
 							tempst.states[1]=temp[k].states[1];
 							tempst.states[2]=temp[k].states[2];*/
 							for(int oldst=0;oldst<N;oldst++)
-								tempst.states[oldst]=temp[k].states[oldst];
+								tempst.states[oldst] = it_temp->states[oldst];
 							tempst.states[curInter[interNumber][i].n2]=j;
 
-							tempst.coeff[0]=temp[k].coeff[0];
-							tempst.coeff[1]=temp[k].coeff[1];
-							tempst.coeff[2]=temp[k].coeff[2];
+							tempst.coeff[0] = it_temp->coeff[0];
+							tempst.coeff[1] = it_temp->coeff[1];
+							tempst.coeff[2] = it_temp->coeff[2];
 
 
 							curE=0;
@@ -703,16 +704,15 @@ void add_state_to_map(unordered_map<state, double> &cur_set, const state s)
 	double curE,E0;
 	E0=N*Energie[0];
 	temp.clear();
-	for(int inSt=0;inSt<inv.size();inSt++)
+	vector<state>::iterator it_inv, it_temp;
+	for (it_inv = inv.begin(); it_inv != inv.end(); it_inv++)
 	{
 		for (int j = 0; j<MatrixSize; j++)
 		{
-			if(VmatrixInside[inv[inSt].states[plaquetNumber]][j]!=0)
+			if (VmatrixInside[it_inv->states[plaquetNumber]][j] != 0)
 			{
-
-
 				for(int oldst=0;oldst<N;oldst++)
-					tempst.states[oldst]=inv[inSt].states[oldst];
+					tempst.states[oldst] = it_inv->states[oldst];
 				tempst.states[plaquetNumber]=j;
 
 				curE=0;
@@ -722,11 +722,11 @@ void add_state_to_map(unordered_map<state, double> &cur_set, const state s)
 				if(E0!=curE)
 				{
 
-					tempst.factor=inv[inSt].factor*VmatrixInside[inv[inSt].states[plaquetNumber]][j];
+					tempst.factor = it_inv->factor*VmatrixInside[it_inv->states[plaquetNumber]][j];
 
-					tempst.coeff[0]=inv[inSt].coeff[0];
-					tempst.coeff[1]=inv[inSt].coeff[1];
-					tempst.coeff[2]=inv[inSt].coeff[2]+1;
+					tempst.coeff[0] = it_inv->coeff[0];
+					tempst.coeff[1] = it_inv->coeff[1];
+					tempst.coeff[2] = it_inv->coeff[2] + 1;
 
 					temp.push_back(tempst);
 				}
@@ -746,16 +746,17 @@ void add_state_to_map(unordered_map<state, double> &cur_set, const state s)
 	double curE,E0;
 	E0=N*Energie[0];
 	temp.clear();
-	for(int inSt=0;inSt<inv.size();inSt++)
+	vector<state>::iterator it_inv, it_temp;
+	for (it_inv = inv.begin(); it_inv != inv.end(); it_inv++)
 	{
 		for (int j = 0; j<MatrixSize; j++)
 		{
-			if(VmatrixInside[inv[inSt].states[plaquetNumber]][j]!=0)
+			if (VmatrixInside[it_inv->states[plaquetNumber]][j] != 0)
 			{
 
 
 				for(int oldst=0;oldst<N;oldst++)
-					tempst.states[oldst]=inv[inSt].states[oldst];
+					tempst.states[oldst] = it_inv->states[oldst];
 				tempst.states[plaquetNumber]=j;
 
 				curE=0;
@@ -765,11 +766,11 @@ void add_state_to_map(unordered_map<state, double> &cur_set, const state s)
 				if(E0!=curE)
 				{
 
-					tempst.factor=inv[inSt].factor*VmatrixInside[inv[inSt].states[plaquetNumber]][j]/pow(double(E0-curE),power);
+					tempst.factor = it_inv->factor*VmatrixInside[it_inv->states[plaquetNumber]][j] / pow(double(E0 - curE), power);
 
-					tempst.coeff[0]=inv[inSt].coeff[0];
-					tempst.coeff[1]=inv[inSt].coeff[1];
-					tempst.coeff[2]=inv[inSt].coeff[2]+1;
+					tempst.coeff[0] = it_inv->coeff[0];
+					tempst.coeff[1] = it_inv->coeff[1];
+					tempst.coeff[2] = it_inv->coeff[2] + 1;
 
 					temp.push_back(tempst);
 				}
@@ -789,16 +790,17 @@ void add_state_to_map(unordered_map<state, double> &cur_set, const state s)
 	double curE,E0;
 	E0=N*Energie[0];
 	temp.clear();
-	for(int inSt=0;inSt<inv.size();inSt++)
+	vector<state>::iterator it_inv, it_temp;
+	for (it_inv = inv.begin(); it_inv != inv.end(); it_inv++)
 	{
 		for (int j = 0; j<MatrixSize; j++)//перебираем все элементы текущей строки матрицы перехода
 		{
-			if(VmatrixInside[inv[inSt].states[plaquetNumber]][j]!=0)
+			if (VmatrixInside[it_inv->states[plaquetNumber]][j] != 0)
 			{
 
 
 				for(int oldst=0;oldst<N;oldst++)
-					tempst.states[oldst]=inv[inSt].states[oldst];
+					tempst.states[oldst] = it_inv->states[oldst];
 				tempst.states[plaquetNumber]=j;
 
 				curE=0;
@@ -808,11 +810,11 @@ void add_state_to_map(unordered_map<state, double> &cur_set, const state s)
 				if(E0==curE)
 				{
 
-					tempst.factor=inv[inSt].factor*VmatrixInside[inv[inSt].states[plaquetNumber]][j];
+					tempst.factor = it_inv->factor*VmatrixInside[it_inv->states[plaquetNumber]][j];
 
-					tempst.coeff[0]=inv[inSt].coeff[0];
-					tempst.coeff[1]=inv[inSt].coeff[1];
-					tempst.coeff[2]=inv[inSt].coeff[2]+1;
+					tempst.coeff[0] = it_inv->coeff[0];
+					tempst.coeff[1] = it_inv->coeff[1];
+					tempst.coeff[2] = it_inv->coeff[2] + 1;
 
 					temp.push_back(tempst);
 				}
